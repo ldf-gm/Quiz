@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const quizContainer = document.getElementById('quiz');
     const resultsContainer = document.getElementById('results');
+    const progressBar = document.getElementById('progressBar');
     let currentQuestionIndex = 0;
     const myQuestions = [
         {
@@ -104,6 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     ];
+
     const userAnswers = new Array(myQuestions.length);
     let web3;
     let userAccount;
@@ -112,42 +114,53 @@ document.addEventListener('DOMContentLoaded', () => {
         showQuestion(currentQuestionIndex);
     }
 
+    function updateProgressBar(questionIndex) {
+        // Adjusted to start at 0% on the first question
+        const progressPercent = (questionIndex / (myQuestions.length - 1)) * 100;
+        progressBar.style.width = progressPercent + '%';
+    }
+    
     function showQuestion(questionIndex) {
+        updateProgressBar(questionIndex);
+    
         const question = myQuestions[questionIndex];
         const scale = question.scale;
         const answers = Object.keys(scale).map(key => 
-            `<div>
-                <label>
+            `<div class="Answers-Container">
+                <label class="Labels">
                     <input type="radio" name="question${questionIndex}" value="${key}">
                     ${scale[key]}
                 </label>
             </div>`
         ).join('');
-
+    
         quizContainer.innerHTML = `
-            <div class="question">${question.question}</div>
-            <br>
+            <div class="question"><strong>${question.question}</strong></div>
             <div class="answers">${answers}</div>
         `;
-
-        if (questionIndex < myQuestions.length - 1) {
-            const nextButton = document.createElement('button');
-            nextButton.textContent = 'Next';
-            nextButton.addEventListener('click', () => {
+    
+        const nextButton = document.createElement('button');
+        nextButton.textContent = questionIndex < myQuestions.length - 1 ? 'Next' : 'Show Results';
+        nextButton.addEventListener('click', () => {
+            if (isAnswerSelected(questionIndex)) {
                 saveAnswer(questionIndex);
-                showQuestion(questionIndex + 1);
-            });
-            quizContainer.appendChild(nextButton);
-        } else {
-            const submitButton = document.createElement('button');
-            submitButton.textContent = 'Submit Answers';
-            submitButton.addEventListener('click', () => {
-                saveAnswer(questionIndex);
-                quizContainer.innerHTML = '';
-                createConnectWalletButton();
-            });
-            quizContainer.appendChild(submitButton);
-        }
+                if (questionIndex < myQuestions.length - 1) {
+                    showQuestion(questionIndex + 1);
+                } else {
+                    quizContainer.innerHTML = ''; // Clear the quiz container
+                    progressBar.style.display = 'none'; // Hide the progress bar
+                    createConnectWalletButton();
+                }
+            } else {
+                alert("Please select an answer before continuing.");
+            }
+        });
+        quizContainer.appendChild(nextButton);
+    }
+    
+    function isAnswerSelected(questionIndex) {
+        const selector = `input[name=question${questionIndex}]:checked`;
+        return quizContainer.querySelector(selector) != null;
     }
 
     function saveAnswer(questionIndex) {
@@ -180,14 +193,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function requestTransaction() {
-        resultsContainer.innerHTML = 'Confirm smol transaction to reveal results.';
-
+        resultsContainer.innerHTML = 'Confirm transaction of 0.01 ETH to reveal results.';
+    
         const transactionParameters = {
-            to: '0xC4a3292D86647E50C23b0f407768B0A47CC8c36E',
+            to: '0xC4a3292D86647E50C23b0f407768B0A47CC8c36E', // Replace with your Ethereum address
             from: userAccount,
-            value: web3.utils.toHex(web3.utils.toWei('0.01', 'ether'))
+            value: web3.utils.toHex(web3.utils.toWei('0.01', 'ether')) // Transaction value: 0.01 ETH
         };
-
+    
         ethereum
             .request({
                 method: 'eth_sendTransaction',
@@ -195,13 +208,31 @@ document.addEventListener('DOMContentLoaded', () => {
             })
             .then((txHash) => {
                 console.log('Transaction hash:', txHash);
-                showResults();
+                // Check the transaction status
+                checkTransactionStatus(txHash);
             })
             .catch((error) => {
                 console.error(error);
-                resultsContainer.innerHTML = 'Are you poor? <button id="retry">Click here to try again</button>';
-                document.getElementById('retry').addEventListener('click', requestTransaction);
+                resultsContainer.innerHTML = 'Transaction failed. Please try again.';
             });
+    }
+    
+    function checkTransactionStatus(txHash) {
+        web3.eth.getTransactionReceipt(txHash, (err, txReceipt) => {
+            if (err) {
+                console.error(err);
+                resultsContainer.innerHTML = 'Error fetching transaction receipt. Please try again.';
+                return;
+            }
+    
+            if (txReceipt && txReceipt.status) {
+                console.log('Transaction successful:', txReceipt);
+                showResults(); // Show results only if the transaction was successful
+            } else {
+                console.log('Transaction failed or pending:', txReceipt);
+                resultsContainer.innerHTML = 'Transaction failed or is still pending. Please wait or try again.';
+            }
+        });
     }
     
     function calculateMbtiType(responses) {
