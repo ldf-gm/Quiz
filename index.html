@@ -3,14 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz App</title>
+    <title>Crypto Archetypes</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.3.0/web3.min.js"></script>
+    <style>
+        #progressBarContainer {
+            width: 100%;
+            background-color: #ddd;
+        }
+        #progressBar {
+            height: 20px;
+            width: 0%;
+            background-color: #0000FF;
+        }
+        #quiz-container {
+            margin: 0 auto;
+            max-width: 600px;
+            padding: 20px;
+            text-align: center;
+        }
+        .question, .answers {
+            margin-bottom: 10px;
+        }
+    </style>
 </head>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.3.0/web3.min.js"></script>
 <body>
     <div id="quiz-container">
-        <h1>Quiz Time!</h1>
-        <h2>What is Your Crypto Archetype?</h2>
+        <h1>What is Your Crypto Archetype?</h1>
+        <div id="progressBarContainer">
+            <div id="progressBar"></div>
+        </div>
         <div id="quiz">
             <!-- Quiz questions will be loaded here -->
         </div>
