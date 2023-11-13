@@ -18,14 +18,13 @@ body {
 
 .question {
     margin-top: 20px;
-    font-size: 1.25rem; /* Increase the font size */
+    font-size: 1.25rem;
     margin-bottom: 20px;
 }
     
 
 .Answers-Container { 
-    /* Adjust padding and margins as needed */
-    padding: 2px;  /* Reduced padding */
+    padding: 2px;  
 }
 
 .Labels {
@@ -33,9 +32,9 @@ body {
     width: 500px;
     padding: .75rem;
     transition: box-shadow .3s;
-    margin: 10px;  /* Reduced margin */
+    margin: 10px; 
     box-shadow: rgba(6, 24, 44, 0.4) 0px 0px 0px 2px, rgba(6, 24, 44, 0.1) 0px 4px 6px -1px, rgba(255, 255, 255, 0.04) 0px 1px 0px inset;
-    text-align: left; /* Align text to the left */
+    text-align: left;
 }
 
 .Labels:hover {
